@@ -22,10 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ----------------------------------------------------
 // ডাটাবেস কনফিগারেশন
 // ----------------------------------------------------
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'study_vault'); // আপনার ডাটাবেস নাম পরিবর্তন করুন
-define('DB_USER', 'root');      // আপনার ইউজারনেম পরিবর্তন করুন
-define('DB_PASS', '');          // আপনার পাসওয়ার্ড পরিবর্তন করুন
+define('DB_HOST', 'sql100.infinityfree.com'); // আপনার MySQL Host Name
+define('DB_NAME', 'if0_40499921_Engnote'); // আপনার MySQL DB Name
+define('DB_USER', 'if0_40499921');      // আপনার MySQL User Name
+define('DB_PASS', 'mujahid2004);          // আপনার MySQL Password (vPanel/Control Panel পাসওয়ার্ড)
 
 // ----------------------------------------------------
 // PDO সংযোগ (Database Connection)
