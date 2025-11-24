@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Vault – Admin Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css"> 
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-color);
+        }
+        .login-container {
+            width: 350px;
+            padding: 30px;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .login-container h2 {
+            color: var(--accent-color);
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        #login-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #login-btn:hover {
+            background-color: #2563eb;
+        }
+        #message-box {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        .error { background-color: #fee2e2; color: #dc2626; }
+        .success { background-color: #d1fae5; color: #059669; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2><i class="fas fa-lock accent-color"></i> অ্যাডমিন প্যানেল লগইন</h2>
+        <div id="message-box"></div>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">ইউজারনেম:</label>
+                <input type="text" id="username" name="username" required value="admin">
+            </div>
+            <div class="form-group">
+                <label for="password">পাসওয়ার্ড:</label>
+                <input type="password" id="password" name="password" required value="admin">
+            </div>
+            <button type="submit" id="login-btn"><i class="fas fa-sign-in-alt"></i> লগইন করুন</button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = '../api'; // API ফোল্ডারের পাথ
+        const loginForm = document.getElementById('login-form');
+        const messageBox = document.getElementById('message-box');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        /**
+         * মেসেজ ডিসপ্লে করে
+         * @param {string} message 
+         * @param {string} type ('success' or 'error')
+         */
+        function displayMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = type;
+            messageBox.style.display = 'block';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            messageBox.style.display = 'none';
+
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin.php?action=login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayMessage(data.message, 'success');
+                    // সফল হলে অ্যাডমিন ড্যাশবোর্ডে রিডিরেক্ট করুন
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard.html'; 
+                        // **নোট:** আমরা এখনও dashboard.html তৈরি করিনি, কিন্তু এই পেজে যাবে।
+                    }, 500);
+                } else {
+                    displayMessage(data.message || 'Login failed. Try again.', 'error');
+                }
+
+            } catch (error) {
+                console.error("Login Error:", error);
+                displayMessage('Network error or server unavailable.', 'error');
+            }
+        });
+
+        // ----------------------------------------------------
+        // বোনাস: যদি ইউজার ইতিমধ্যেই লগইন করে থাকে, ড্যাশবোর্ডে নিয়ে যান
+        // ----------------------------------------------------
+        async function checkAuthAndRedirect() {
+            try {
+                const response = await fetch(`${API_BASE}/admin.php?action=check_auth`);
+                const data = await response.json();
+                
+                if (data.success && data.is_logged_in) {
+                    // লগইন করা থাকলে সরাসরি ড্যাশবোর্ডে
+                    window.location.href = '/admin/dashboard.html';
+                }
+            } catch (error) {
+                // লগইন করা না থাকলে এখানেই থাকুন
+                console.log("Not logged in, showing login form.");
+            }
+        }
+
+        checkAuthAndRedirect();
+    </script>
+</body>
+</html>
