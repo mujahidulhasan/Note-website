@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html lang="bn">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Study Vault – Notes Platform</title>
+
+    
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap" rel="stylesheet">
+
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body class="light-mode">
+
+    
+
+    <header id="main-header">
+
+        <div class="logo">
+
+            <h1>Study Vault</h1>
+
+        </div>
+
+        
+
+        <div class="search-container">
+
+            <input type="text" id="search-input" placeholder="বিষয়, অধ্যায়, বা নোটে খুঁজুন..." aria-label="Search">
+
+            <i class="fas fa-search"></i>
+
+        </div>
+
+        
+
+        <div class="header-right">
+
+            <button id="settings-btn" aria-label="Settings">
+
+                <i class="fas fa-cog"></i>
+
+            </button>
+
+        </div>
+
+    </header>
+
+    
+
+    <div id="notice-bar" style="display: none;">
+
+        </div>
+
+    <main id="app-content">
+
+        <h2>বিষয়সমূহ</h2>
+
+        <div id="content-grid" class="subject-grid grid-2-col">
+
+            </div>
+
+    </main>
+
+    
+
+    <aside id="settings-panel" class="slide-panel">
+
+        <h3><i class="fas fa-cog accent-color"></i> সেটিংস</h3>
+
+        <hr>
+
+        
+
+        <section class="setting-group">
+
+            <h4>থিম মোড</h4>
+
+            <div class="toggle-switch">
+
+                <label>
+
+                    <input type="checkbox" id="theme-toggle">
+
+                    <span class="slider round"></span>
+
+                </label>
+
+                <span id="mode-text">লাইট মোড</span>
+
+            </div>
+
+        </section>
+
+        <section class="setting-group">
+
+            <h4>গ্রিড স্পেসিং</h4>
+
+            <input type="range" id="grid-spacing-slider" min="10" max="40" value="20">
+
+        </section>
+
+        <section class="setting-group">
+
+            <h4>কার্ড সাইজ</h4>
+
+            <select id="card-size-select">
+
+                <option value="medium">মাঝারি</option>
+
+                <option value="small">ছোট</option>
+
+                <option value="large">বড়</option>
+
+            </select>
+
+        </section>
+
+        <section class="setting-group">
+
+            <h4>ফন্ট সাইজ</h4>
+
+            <input type="range" id="font-size-slider" min="14" max="20" value="16">
+
+        </section>
+
+    </aside>
+
+    
+
+    <div id="overlay"></div>
+
+    <script src="js/main.js"></script>
+
+</body>
+
+</html>
