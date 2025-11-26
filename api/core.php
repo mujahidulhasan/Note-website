@@ -12,12 +12,15 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 // ----------------------------------------------------
-// ডাটাবেস কনফিগারেশন - এটি পরিবর্তন করবেন না!
+// ডাটাবেস কনফিগারেশন (Development local DB)
+// Update these for production; kept here for local dev convenience.
 // ----------------------------------------------------
-define('DB_HOST', 'sql100.infinityfree.com'); 
-define('DB_NAME', 'if0_40499921_Engnote'); 
-define('DB_USER', 'if0_40499921');      
-define('DB_PASS', 'ViSECXOQvC5'); 
+define('DB_HOST', '127.0.0.1');
+define('DB_NAME', 'engnote_local');
+define('DB_USER', 'engnote_user');
+define('DB_PASS', 'Engnote_local_pass!23');
+// For local dev we prefer SQLite when a MySQL server is not available.
+define('DB_DRIVER', 'sqlite'); // 'sqlite' or 'mysql'
 
 // ----------------------------------------------------
 // Headers
@@ -35,9 +38,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // PDO সংযোগ (Database Connection)
 // ----------------------------------------------------
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    if (defined('DB_DRIVER') && DB_DRIVER === 'sqlite') {
+        $dbFile = __DIR__ . '/../data/engnote.sqlite';
+        if (!file_exists(dirname($dbFile))) {
+            mkdir(dirname($dbFile), 0777, true);
+        }
+        $pdo = new PDO('sqlite:' . $dbFile);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        // Enable foreign key support
+        $pdo->exec('PRAGMA foreign_keys = ON;');
+    } else {
+        $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    }
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "Database connection failed! Check credentials: " . $e->getMessage()]);

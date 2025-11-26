@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+
+<html lang="bn">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Study Vault – Admin Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/style.css">    <style>
+
+        /* ড্যাশবোর্ড স্পেসিফিক স্টাইল */
+
+        body { 
+
+            background-color: var(--background-color); 
+
+            min-height: 100vh;
+
+        }
+
+        .dashboard-container {
+
+            max-width: 1200px;
+
+            margin: 20px auto;
+
+            padding: 20px;
+
+            background-color: var(--card-background);
+
+            border-radius: 12px;
+
+            box-shadow: var(--shadow);
+
+            display: block; /* Show by default */
+
+        }
+
+        .loading-message {
+
+            text-align: center;
+
+            padding-top: 50px;
+
+            color: var(--text-color);
+
+        }
+
+        .dashboard-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 20px;
+
+            border-bottom: 1px solid var(--border-color);
+
+            padding-bottom: 10px;
+
+        }
+
+        .dashboard-header h1 {
+
+            color: var(--accent-color);
+
+            font-size: 1.8em;
+
+        }
+
+        #logout-btn {
+
+            padding: 8px 15px;
+
+            background-color: #ef4444; /* Red */
+
+            color: white;
+
+            border: none;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            transition: background-color 0.2s;
+
+        }
+
+        #logout-btn:hover { background-color: #dc2626; }
+
+        /* ট্যাব ন্যাভিগেশন */
+
+        .tabs {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            margin-bottom: 20px;
+
+            border-bottom: 2px solid var(--border-color);
+
+        }
+
+        .tab-btn {
+
+            padding: 10px 15px;
+
+            cursor: pointer;
+
+            border: none;
+
+            background: none;
+
+            color: var(--text-color);
+
+            border-bottom: 2px solid transparent;
+
+            transition: all 0.2s;
+
+            font-size: 1em;
+
+            font-family: 'Tiro Bangla', sans-serif;
+
+        }
+
+        .tab-btn.active {
+
+            color: var(--accent-color);
+
+            border-bottom: 2px solid var(--accent-color);
+
+            font-weight: bold;
+
+        }
+
+        .tab-btn:hover:not(.active) {
+
+            background-color: var(--background-color);
+
+        }
+
+        
+
+        /* কন্টেন্ট এরিয়া স্টাইল */
+
+        #tab-content {
+
+            padding: 15px 0;
+
+        }
+
+        .manager-form-container {
+
+            padding: 20px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: 8px;
+
+            margin-bottom: 20px;
+
+        }
+
+        .manager-form-container h3 {
+
+            border-bottom: 1px dashed var(--border-color);
+
+            padding-bottom: 10px;
+
+            margin-bottom: 15px;
+
+            color: var(--accent-color);
+
+        }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-group label {
+
+            display: block;
+
+            margin-bottom: 5px;
+
+            font-weight: bold;
+
+        }
+
+        .form-group input[type="text"], 
+
+        .form-group input[type="file"],
+
+        .form-group textarea,
+
+        .form-group select {
+
+            width: 100%;
+
+            padding: 8px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: 4px;
+
+            background-color: var(--background-color);
+
+            color: var(--text-color);
+
+        }
+
+        .submit-btn {
+
+            padding: 10px 20px;
+
+            background-color: var(--accent-color);
+
+            color: white;
+
+            border: none;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            transition: background-color 0.2s;
+
+        }
+
+        .submit-btn:hover {
+
+            background-color: #2563eb;
+
+        }
+
+        .data-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            margin-top: 20px;
+
+        }
+
+        .data-table th, .data-table td {
+
+            border: 1px solid var(--border-color);
+
+            padding: 10px;
+
+            text-align: left;
+
+        }
+
+        .data-table th {
+
+            background-color: var(--header-background);
+
+            font-weight: bold;
+
+        }
+
+        .action-btn {
+
+            padding: 5px 10px;
+
+            margin-right: 5px;
+
+            border: none;
+
+            border-radius: 4px;
+
+            cursor: pointer;
+
+        }
+
+        .edit-btn { background-color: #fcd34d; }
+
+        .delete-btn { background-color: #ef4444; color: white; }
+
+        .error-message { color: #dc2626; font-weight: bold; }
+
+        .success { color: #059669; font-weight: bold; }
+
+        
+
+        /* মোবাইল রেসপনসিভনেস */
+
+        @media (max-width: 768px) {
+
+            .dashboard-container {
+
+                padding: 10px;
+
+                margin: 0; 
+
+                box-shadow: none; 
+
+                border-radius: 0;
+
+            }
+
+            .tabs {
+
+                flex-direction: column;
+
+                border-bottom: none;
+
+            }
+
+            .tab-btn {
+
+                width: 100%; 
+
+                border-bottom: 1px solid var(--border-color); 
+
+                text-align: left;
+
+            }
+
+            .tab-btn.active {
+
+                background-color: var(--background-color); 
+
+            }
+
+            .dashboard-header {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+            .dashboard-header h1 {
+
+                margin-bottom: 10px;
+
+            }
+
+            
+
+            /* টেবিল রেসপনসিভনেস */
+
+            .data-table, .data-table tbody, .data-table td, .data-table th {
+
+                display: block;
+
+                width: 100%;
+
+            }
+
+            .data-table thead { display: none; }
+
+            .data-table tr { 
+
+                margin-bottom: 10px;
+
+                border: 1px solid var(--border-color);
+
+                display: block;
+
+            }
+
+            .data-table td {
+
+                text-align: right;
+
+                padding-left: 50%;
+
+                position: relative;
+
+            }
+
+            .data-table td::before {
+
+                content: attr(data-label);
+
+                position: absolute;
+
+                left: 6px;
+
+                width: 45%;
+
+                padding-right: 10px;
+
+                white-space: nowrap;
+
+                text-align: left;
+
+                font-weight: bold;
+
+                color: var(--accent-color);
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="loading-message" id="loading-msg">ড্যাশবোর্ড লোড হচ্ছে...</div>
+
+    <div class="dashboard-container">
+
+        <div class="dashboard-header">
+
+            <h1><i class="fas fa-tools"></i> অ্যাডমিন ড্যাশবোর্ড</h1>
+
+            <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> লগ আউট</button>
+
+        </div>
+
+        <div class="tabs">
+
+            <button class="tab-btn active" data-tab="subject"><i class="fas fa-book-open"></i> বিষয় ম্যানেজার</button>
+
+            <button class="tab-btn" data-tab="chapter"><i class="fas fa-layer-group"></i> চ্যাপ্টার ম্যানেজার</button>
+
+            <button class="tab-btn" data-tab="notes"><i class="fas fa-sticky-note"></i> নোটস ম্যানেজার</button>
+
+            <button class="tab-btn" data-tab="notice"><i class="fas fa-bullhorn"></i> নোটিশ ম্যানেজার</button>
+
+            <button class="tab-btn" data-tab="settings"><i class="fas fa-cogs"></i> সিস্টেম সেটিংস</button>
+
+        </div>
+
+        <div id="tab-content">
+
+            </div>
+
+    </div>
+
+    <script>
+
+        // *********************************************************
+
+        // WARNING: admin_logic.js এর সম্পূর্ণ কোড এখানে শুরু হচ্ছে (ইনলাইন ফিক্স)
+
+        // *********************************************************
+
+        const API_BASE = '../api';
+
+        const dashboardContainer = document.querySelector('.dashboard-container');
+
+        const loadingMsg = document.getElementById('loading-msg');
+
+        const tabContent = document.getElementById('tab-content'); 
+
+        const tabs = document.querySelector('.tabs');
+
+        const logoutBtn = document.getElementById('logout-btn');
+
+        
+
+        let allSubjects = [];
+
+        // ----------------------------------------------------
+
+        // ক. ইউটিলিটি ফাংশন
+
+        // ----------------------------------------------------
+async function fetchNoteList() {
+    const container = document.getElementById('note-list-container');
+    if (!container) return;
+    
+    container.innerHTML = '<p>নোটস তালিকা লোড হচ্ছে...</p>';
+
+    // এখানে একটি নতুন API অ্যাকশন দরকার: list_notes_admin
+    const { success, data: notes } = await fetchData(`${API_BASE}/notes.php?action=list_notes_admin`);
+
+    if (success && notes && notes.length > 0) {
+        let tableHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>শিরোনাম</th>
+                        <th>বিষয়/অধ্যায়</th>
+                        <th>টাইপ</th>
+                        <th>আপলোড তারিখ</th>
+                        <th>এডিটের সংখ্যা</th>
+                        <th>অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        notes.forEach(note => {
+            const subjectName = allSubjects.find(s => s.id == note.subject_id)?.name || 'N/A';
+            tableHTML += `
+                <tr>
+                    <td data-label="ID">${note.id}</td>
+                    <td data-label="শিরোনাম">${note.title}</td>
+                    <td data-label="বিষয়/অধ্যায়">${subjectName} (${note.chapter_name || 'N/A'})</td>
+                    <td data-label="টাইপ">${note.file_type.toUpperCase()}</td>
+                    <td data-label="আপলোড তারিখ">${new Date(note.upload_date).toLocaleDateString('bn-BD')}</td>
+                    <td data-label="এডিটের সংখ্যা">${note.edit_count || 0}</td>
+                    <td data-label="অ্যাকশন">
+                        <button class="action-btn edit-btn" data-id="${note.id}"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn delete-btn" data-id="${note.id}"><i class="fas fa-trash"></i></button>
+                        <button class="action-btn info-btn" onclick="showNoteHistory(${note.id})"><i class="fas fa-history"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+        tableHTML += `</tbody></table>`;
+        container.innerHTML = tableHTML;
+        
+        // ডিলিট ইভেন্ট লিসেনার সেটআপ
+        document.querySelectorAll('#note-list-container .delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteNote(btn.dataset.id));
+        });
+
+    } else {
+        container.innerHTML = '<p class="info-message">এখনও কোনো নোটস আপলোড করা হয়নি।</p>';
+    }
+}
+
+/**
+ * নোটের ইতিহাস (History) দেখানোর জন্য ডামি ফাংশন
+ */
+function showNoteHistory(noteId) {
+    alert(`নোট ID ${noteId} এর ইতিহাস লোড করার API এখানে যোগ করা হবে।`);
+    // এখানে একটি Modal বা নতুন কন্টেন্ট এরিয়া লোড হবে
+}
+        async function fetchAllSubjects(includeSelect = false) {
+
+            try {
+
+                const response = await fetch(`${API_BASE}/subject.php?action=list`);
+
+                const data = await response.json();
+
+                
+
+                if (data.success) {
+
+                    allSubjects = data.data; 
+
+                    
+
+                    if (includeSelect) {
+
+                        const selectElementChapter = document.getElementById('chapter-subject-select');
+
+                        const selectElementNote = document.getElementById('note-subject-select');
+
+                        
+
+                        // চ্যাপ্টার সিলেক্ট বক্স আপডেট
+
+                        if (selectElementChapter) {
+
+                            selectElementChapter.innerHTML = '<option value="">-- একটি বিষয় নির্বাচন করুন --</option>';
+
+                            data.data.forEach(subject => {
+
+                                const option = document.createElement('option');
+
+                                option.value = subject.id;
+
+                                option.textContent = subject.name;
+
+                                selectElementChapter.appendChild(option);
+
+                            });
+
+                        }
+
+                        
+
+                        // নোটস সিলেক্ট বক্স আপডেট
+
+                        if (selectElementNote) {
+
+                            selectElementNote.innerHTML = '<option value="">-- একটি বিষয় নির্বাচন করুন --</option>';
+
+                            data.data.forEach(subject => {
+
+                                const option = document.createElement('option');
+
+                                option.value = subject.id;
+
+                                option.textContent = subject.name;
+
+                                selectElementNote.appendChild(option);
+
+                            });
+
+                        }
+
+                    }
+
+                    return true;
+
+                } else {
+
+                    console.error("Failed to load subjects:", data.message);
+
+                    return false;
+
+                }
+
+            } catch (error) {
+
+                console.error("Network error while fetching subjects:", error);
+
+                return false;
+
+            }
+
+        }
+
+        function displayFormMessage(element, message, type) {
+
+            element.className = type;
+
+            element.textContent = message;
+
+        }
+
+        // ----------------------------------------------------
+
+        // খ. বিষয় (SUBJECT) ম্যানেজারের লজিক
+
+        // ----------------------------------------------------
+
+        function loadSubjectManager() {
+
+            tabContent.innerHTML = `
+
+                <h2><i class="fas fa-book-open"></i> বিষয় ম্যানেজার</h2>
+
+                <p>নতুন বিষয় যোগ করুন, সম্পাদনা করুন বা মুছে ফেলুন।</p>
+
+                
+
+                <div class="manager-form-container">
+
+                    <h3>বিষয় যোগ করুন</h3>
+
+                    <form id="add-subject-form">
+
+                        <div class="form-group">
+
+                            <label for="subject-name">বিষয় নাম:</label>
+
+                            <input type="text" id="subject-name" name="name" required>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="subject-icon-file">বিষয় আইকন আপলোড (PNG/SVG):</label>
+
+                            <input type="file" id="subject-icon-file" name="icon_file" accept=".png,.svg,.jpg" required>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="subject-description">বিবরণ (ঐচ্ছিক):</label>
+
+                            <textarea id="subject-description" name="description"></textarea>
+
+                        </div>
+
+                        <button type="submit" class="submit-btn"><i class="fas fa-plus"></i> বিষয় যুক্ত করুন</button>
+
+                        <div id="subject-form-message" style="margin-top: 10px;"></div>
+
+                    </form>
+
+                </div>
+
+                
+
+                <h3>বিদ্যমান বিষয়সমূহ</h3>
+
+                <div id="subject-list-container">
+
+                    <p>বিষয় তালিকা লোড হচ্ছে...</p>
+
+                </div>
+
+            `;
+
+            setupSubjectForm();
+
+            fetchSubjectList(); 
+
+        }
+
+        async function fetchSubjectList() {
+
+            const container = document.getElementById('subject-list-container');
+
+            if (!container) return;
+
+            
+
+            container.innerHTML = '<p>বিষয় তালিকা লোড হচ্ছে...</p>';
+
+            if (!(await fetchAllSubjects())) {
+
+                container.innerHTML = '<p class="error-message">বিষয় তালিকা লোড করতে ব্যর্থ হয়েছে।</p>';
+
+                return;
+
+            }
+
+            if (allSubjects.length > 0) {
+
+                let tableHTML = `
+
+                    <table class="data-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>ID</th>
+
+                                <th>আইকন</th>
+
+                                <th>নাম</th>
+
+                                <th>বিবরণ</th>
+
+                                <th>অ্যাকশন</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                `;
+
+                allSubjects.forEach(subject => {
+
+                    tableHTML += `
+
+                        <tr>
+
+                            <td data-label="ID">${subject.id}</td>
+
+                            <td data-label="আইকন"><img src="${subject.icon_url}" alt="Icon" style="width: 30px; height: 30px;"></td>
+
+                            <td data-label="নাম">${subject.name}</td>
+
+                            <td data-label="বিবরণ">${subject.description ? subject.description.substring(0, 50) + '...' : 'নেই'}</td>
+
+                            <td data-label="অ্যাকশন">
+
+                                <button class="action-btn edit-btn" data-id="${subject.id}"><i class="fas fa-edit"></i></button>
+
+                                <button class="action-btn delete-btn" data-id="${subject.id}"><i class="fas fa-trash"></i></button>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                });
+
+                tableHTML += `</tbody></table>`;
+
+                container.innerHTML = tableHTML;
+
+                
+
+                document.querySelectorAll('#subject-list-container .delete-btn').forEach(btn => {
+
+                    btn.addEventListener('click', () => deleteSubject(btn.dataset.id));
+
+                });
+
+            } else {
+
+                container.innerHTML = '<p class="info-message">এখনও কোনো বিষয় যোগ করা হয়নি।</p>';
+
+            }
+
+        }
+
+        function setupSubjectForm() {
+
+            const form = document.getElementById('add-subject-form');
+
+            const message = document.getElementById('subject-form-message');
+
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+
+                e.preventDefault();
+
+                message.textContent = '...যোগ করা হচ্ছে...';
+
+                
+
+                // ফাইল আপলোডের জন্য FormData ব্যবহার
+
+                const formData = new FormData(form);
+
+                formData.append('action', 'add'); // API অ্যাকশন যোগ করা হলো
+
+                try {
+
+                    const response = await fetch(`${API_BASE}/subject.php`, {
+
+                        method: 'POST',
+
+                        body: formData // সরাসরি FormData পাঠানো হচ্ছে
+
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+
+                        displayFormMessage(message, '✅ বিষয় সফলভাবে যুক্ত হয়েছে!', 'success');
+
+                        form.reset();
+
+                        fetchSubjectList(); 
+
+                    } else {
+
+                        displayFormMessage(message, `❌ ব্যর্থ হয়েছে: ${data.message}`, 'error');
+
+                    }
+
+                } catch (error) {
+
+                    displayFormMessage(message, `নেটওয়ার্ক ত্রুটি: ${error.message}`, 'error');
+
+                }
+
+            });
+
+        }
+
+        async function deleteSubject(id) {
+    if (!confirm("আপনি কি নিশ্চিত এই বিষয় এবং এর সাথে সম্পর্কিত নোটস ও চ্যাপ্টার মুছে ফেলতে চান?")) {
+        return;
+    }
+
+    try {
+        // Must use POST method to bypass 403 firewall block
+        const response = await fetch(`${API_BASE}/subject.php?action=delete_post&id=${id}`, {
+            method: 'POST' 
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert("বিষয় সফলভাবে মুছে ফেলা হয়েছে!");
+            fetchSubjectList(); 
+        } else {
+            alert(`মুছে ফেলার ব্যর্থ: ${data.message}`);
+        }
+    } catch (error) {
+        alert("নেটওয়ার্ক ত্রুটি বা সার্ভার এরর।");
+    }
+}
+
+        // ----------------------------------------------------
+
+        // গ. চ্যাপ্টার (CHAPTER) ম্যানেজারের লজিক
+
+        // ----------------------------------------------------
+
+        function loadChapterManager() {
+
+            tabContent.innerHTML = `
+
+                <h2><i class="fas fa-layer-group"></i> চ্যাপ্টার ম্যানেজার</h2>
+
+                <p>বিষয় নির্বাচন করুন এবং এর অধীনে নতুন চ্যাপ্টার যোগ করুন।</p>
+
+                
+
+                <div class="manager-form-container">
+
+                    <h3>চ্যাপ্টার যোগ করুন</h3>
+
+                    <form id="add-chapter-form">
+
+                        <div class="form-group">
+
+                            <label for="chapter-subject-select">বিষয় নির্বাচন করুন:</label>
+
+                            <select id="chapter-subject-select" name="subject_id" required></select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="chapter-name">চ্যাপ্টার নাম:</label>
+
+                            <input type="text" id="chapter-name" name="name" required>
+
+                        </div>
+
+                        <button type="submit" class="submit-btn"><i class="fas fa-plus"></i> চ্যাপ্টার যুক্ত করুন</button>
+
+                        <div id="chapter-form-message" style="margin-top: 10px;"></div>
+
+                    </form>
+
+                </div>
+
+                
+
+                <h3>বিষয় অনুযায়ী চ্যাপ্টার তালিকা</h3>
+
+                <div id="chapter-list-container">
+
+                    <p class="info-message">চ্যাপ্টার তালিকা দেখতে প্রথমে একটি বিষয় নির্বাচন করুন।</p>
+
+                </div>
+
+            `;
+
+            
+
+            fetchAllSubjects(true).then(() => {
+
+                const select = document.getElementById('chapter-subject-select');
+
+                if (select) {
+
+                    select.addEventListener('change', (e) => {
+
+                        const subjectId = parseInt(e.target.value);
+
+                        if (subjectId > 0) {
+
+                            fetchChapterList(subjectId);
+
+                        } else {
+
+                            document.getElementById('chapter-list-container').innerHTML = '<p class="info-message">চ্যাপ্টার তালিকা দেখতে প্রথমে একটি বিষয় নির্বাচন করুন।</p>';
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+            setupChapterForm();
+
+        }
+
+        async function fetchChapterList(subjectId) {
+
+            const container = document.getElementById('chapter-list-container');
+
+            if (!container) return;
+
+            container.innerHTML = '<p>চ্যাপ্টার তালিকা লোড হচ্ছে...</p>';
+
+            
+
+            try {
+
+                const response = await fetch(`${API_BASE}/notes.php?action=chapters_by_subject&subject_id=${subjectId}`);
+
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+
+                    let tableHTML = `
+
+                        <table class="data-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID</th>
+
+                                    <th>চ্যাপ্টার নাম</th>
+
+                                    <th>অ্যাকশন</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                    `;
+
+                    data.data.forEach(chapter => {
+
+                        tableHTML += `
+
+                            <tr>
+
+                                <td data-label="ID">${chapter.id}</td>
+
+                                <td data-label="চ্যাপ্টার নাম">${chapter.name}</td>
+
+                                <td data-label="অ্যাকশন">
+
+                                    <button class="action-btn delete-btn" data-id="${chapter.id}" data-subject-id="${subjectId}"><i class="fas fa-trash"></i> মুছুন</button>
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    });
+
+                    tableHTML += `</tbody></table>`;
+
+                    container.innerHTML = tableHTML;
+
+                    
+
+                    document.querySelectorAll('#chapter-list-container .delete-btn').forEach(btn => {
+
+                        btn.addEventListener('click', () => deleteChapter(btn.dataset.id, btn.dataset.subjectId));
+
+                    });
+
+                } else if (data.success && data.data.length === 0) {
+
+                    container.innerHTML = '<p class="info-message">এই বিষয়ে কোনো চ্যাপ্টার যোগ করা হয়নি।</p>';
+
+                } else {
+
+                    container.innerHTML = `<p class="error-message">চ্যাপ্টার তালিকা লোড করতে ব্যর্থ: ${data.message}</p>`;
+
+                }
+
+            } catch (error) {
+
+                container.innerHTML = `<p class="error-message">নেটওয়ার্ক এরর: ${error.message}</p>`;
+
+            }
+
+        }
+
+        function setupChapterForm() {
+
+            const form = document.getElementById('add-chapter-form');
+
+            const message = document.getElementById('chapter-form-message');
+
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+
+                e.preventDefault();
+
+                message.textContent = '...যোগ করা হচ্ছে...';
+
+                
+
+                const subjectId = document.getElementById('chapter-subject-select').value;
+
+                const name = document.getElementById('chapter-name').value;
+
+                if (!subjectId) {
+
+                    displayFormMessage(message, '❌ একটি বিষয় নির্বাচন করুন।', 'error');
+
+                    return;
+
+                }
+
+                try {
+
+                    const response = await fetch(`${API_BASE}/notes.php?action=add_chapter`, {
+
+                        method: 'POST',
+
+                        headers: { 'Content-Type': 'application/json' },
+
+                        body: JSON.stringify({ subject_id: parseInt(subjectId), name })
+
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+
+                        displayFormMessage(message, '✅ চ্যাপ্টার সফলভাবে যুক্ত হয়েছে!', 'success');
+
+                        document.getElementById('chapter-name').value = '';
+
+                        fetchChapterList(parseInt(subjectId)); 
+
+                    } else {
+
+                        displayFormMessage(message, `❌ ব্যর্থ হয়েছে: ${data.message}`, 'error');
+
+                    }
+
+                } catch (error) {
+
+                    displayFormMessage(message, `নেটওয়ার্ক ত্রুটি: ${error.message}`, 'error');
+
+                }
+
+            });
+
+        }
+
+        async function deleteChapter(chapterId, subjectId) {
+
+            if (!confirm("আপনি কি নিশ্চিত এই চ্যাপ্টার এবং এর অধীনে থাকা নোটস মুছে ফেলতে চান?")) {
+
+                return;
+
+            }
+
+            try {
+
+                const response = await fetch(`${API_BASE}/notes.php?action=delete_chapter&id=${chapterId}`, {
+
+                    method: 'DELETE'
+
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    alert("চ্যাপ্টার সফলভাবে মুছে ফেলা হয়েছে!");
+
+                    fetchChapterList(parseInt(subjectId)); 
+
+                } else {
+
+                    alert(`মুছে ফেলার ব্যর্থ: ${data.message}`);
+
+                }
+
+            } catch (error) {
+
+                alert("নেটওয়ার্ক ত্রুটি বা সার্ভার এরর।");
+
+            }
+
+        }
+
+        // ----------------------------------------------------
+
+        // ঘ. নোটস (NOTES) ম্যানেজারের লজিক
+
+        // ----------------------------------------------------
+
+        function loadNotesManager() {
+
+            tabContent.innerHTML = `
+
+                <h2><i class="fas fa-sticky-note"></i> নোটস ম্যানেজার</h2>
+
+                <p>নতুন নোট আপলোড করুন (PDF, ছবি, ভিডিও, টেক্সট)।</p>
+
+                
+
+                <div class="manager-form-container">
+
+                    <h3>নতুন নোট আপলোড করুন</h3>
+
+                    <form id="add-note-form">
+
+                        <div class="form-group">
+
+                            <label for="note-title">নোট শিরোনাম:</label>
+
+                            <input type="text" id="note-title" name="title" required>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="note-subject-select">বিষয় নির্বাচন করুন:</label>
+
+                            <select id="note-subject-select" name="subject_id" required></select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="note-chapter-select">চ্যাপ্টার নির্বাচন করুন (ঐচ্ছিক):</label>
+
+                            <select id="note-chapter-select" name="chapter_id">
+
+                                <option value="">-- চ্যাপ্টার নেই --</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="note-file">ফাইল আপলোড (PDF, JPG, MP4, TXT):</label>
+
+                            <input type="file" id="note-file" name="note_file" required>
+
+                        </div>
+
+                        <button type="submit" class="submit-btn"><i class="fas fa-upload"></i> নোট আপলোড করুন</button>
+
+                        <div id="note-form-message" style="margin-top: 10px;"></div>
+
+                    </form>
+
+                </div>
+
+                
+
+                <h3>বিদ্যমান নোটস</h3>
+
+                <div id="note-list-container">
+
+                    <p class="info-message">নোটস তালিকা লোড হচ্ছে...</p>
+
+                </div>
+
+            `;
+
+            
+
+            // বিষয় লোড এবং চ্যাপ্টার লোড সেটআপ
+
+            fetchAllSubjects(true).then(() => {
+
+                const subjectSelect = document.getElementById('note-subject-select');
+
+                if (subjectSelect) {
+
+                    subjectSelect.addEventListener('change', (e) => {
+
+                        const subjectId = parseInt(e.target.value);
+
+                        if (subjectId > 0) {
+
+                            fetchChaptersForNotes(subjectId);
+
+                        } else {
+
+                            document.getElementById('note-chapter-select').innerHTML = '<option value="">-- চ্যাপ্টার নেই --</option>';
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+            setupNoteForm();
+
+        }
+
+        async function fetchChaptersForNotes(subjectId) {
+
+            const selectElement = document.getElementById('note-chapter-select');
+
+            if (!selectElement) return;
+
+            selectElement.innerHTML = '<option value="">-- লোড হচ্ছে --</option>';
+
+            try {
+
+                const response = await fetch(`${API_BASE}/notes.php?action=chapters_by_subject&subject_id=${subjectId}`);
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    selectElement.innerHTML = '<option value="">-- চ্যাপ্টার নেই --</option>';
+
+                    data.data.forEach(chapter => {
+
+                        const option = document.createElement('option');
+
+                        option.value = chapter.id;
+
+                        option.textContent = chapter.name;
+
+                        selectElement.appendChild(option);
+
+                    });
+
+                } else {
+
+                    selectElement.innerHTML = '<option value="">-- লোড ব্যর্থ --</option>';
+
+                    console.error("Failed to load chapters for notes:", data.message);
+
+                }
+
+            } catch (error) {
+
+                selectElement.innerHTML = '<option value="">-- নেটওয়ার্ক এরর --</option>';
+
+                console.error("Network error while fetching chapters:", error);
+
+            }
+
+        }
+
+        function setupNoteForm() {
+    const form = document.getElementById('add-note-form');
+    const message = document.getElementById('note-form-message');
+
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        message.textContent = '...ফাইল আপলোড হচ্ছে...';
+        
+        const formData = new FormData(form);
+        formData.append('action', 'add_note'); // নিশ্চিত করুন অ্যাকশন সঠিক আছে
+
+        try {
+            const response = await fetch(`${API_BASE}/notes.php`, {
+                method: 'POST',
+                body: formData 
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                displayFormMessage(message, `✅ নোট সফলভাবে আপলোড হয়েছে!`, 'success');
+                form.reset();
+                
+                // ✅ ফিক্স: আপলোডের পর তালিকা রিফ্রেশ করতে হবে
+                fetchNoteList(); 
+                
+            } else {
+                displayFormMessage(message, `❌ আপলোড ব্যর্থ: ${data.message}`, 'error');
+            }
+        } catch (error) {
+            displayFormMessage(message, `নেটওয়ার্ক ত্রুটি বা সার্ভার সংযোগ ব্যর্থ: ${error.message}`, 'error');
+        }
+    });
+}
+
+        // ----------------------------------------------------
+
+        // ঙ. নোটিশ (NOTICE) ম্যানেজারের লজিক
+
+        // ----------------------------------------------------
+
+        function loadNoticeManager() {
+
+            tabContent.innerHTML = `
+
+                <h2><i class="fas fa-bullhorn"></i> নোটিশ ম্যানেজার</h2>
+
+                <p>ওয়েবসাইটের শীর্ষে দেখানোর জন্য নোটিশ তৈরি, সম্পাদনা বা নিষ্ক্রিয় করুন।</p>
+
+                <div class="manager-form-container">
+
+                    <h3>নতুন নোটিশ পোস্ট করুন</h3>
+
+                    <form id="add-notice-form">
+
+                        <div class="form-group">
+
+                            <label for="notice-content">নোটিশের বিষয়বস্তু:</label>
+
+                            <textarea id="notice-content" name="content" required></textarea>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="notice-active">সক্রিয় (ওয়েবসাইটে দেখাবে):</label>
+
+                            <input type="checkbox" id="notice-active" name="is_active" checked>
+
+                        </div>
+
+                        <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> নোটিশ পোস্ট করুন</button>
+
+                        <div id="notice-form-message" style="margin-top: 10px;"></div>
+
+                    </form>
+
+                </div>
+
+                <h3>বিদ্যমান নোটিশসমূহ</h3>
+
+                <div id="notice-list-container">
+
+                    <p class="info-message">নোটিশ তালিকা লোড হচ্ছে...</p>
+
+                </div>
+
+            `;
+
+            setupNoticeForm();
+
+            fetchNoticeList();
+
+        }
+
+        function setupNoticeForm() {
+
+            const form = document.getElementById('add-notice-form');
+
+            const message = document.getElementById('notice-form-message');
+
+            
+
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+
+                e.preventDefault();
+
+                message.textContent = '...পোস্ট করা হচ্ছে...';
+
+                
+
+                const content = document.getElementById('notice-content').value;
+
+                const isActive = document.getElementById('notice-active').checked;
+
+                try {
+
+                    const response = await fetch(`${API_BASE}/notice.php?action=add_notice`, {
+
+                        method: 'POST',
+
+                        headers: { 'Content-Type': 'application/json' },
+
+                        body: JSON.stringify({ content, is_active: isActive ? 1 : 0 })
+
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+
+                        displayFormMessage(message, '✅ নোটিশ সফলভাবে পোস্ট হয়েছে!', 'success');
+
+                        form.reset();
+
+                        fetchNoticeList(); 
+
+                    } else {
+
+                        displayFormMessage(message, `❌ পোস্ট ব্যর্থ: ${data.message}`, 'error');
+
+                    }
+
+                } catch (error) {
+
+                    displayFormMessage(message, `নেটওয়ার্ক ত্রুটি: ${error.message}`, 'error');
+
+                }
+
+            });
+
+        }
+
+        async function fetchNoticeList() {
+
+            const container = document.getElementById('notice-list-container');
+
+            if (!container) return;
+
+            container.innerHTML = '<p>নোটিশ তালিকা লোড হচ্ছে...</p>';
+
+            
+
+            try {
+
+                const response = await fetch(`${API_BASE}/notice.php?action=list_notices`);
+
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+
+                    let tableHTML = `
+
+                        <table class="data-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID</th>
+
+                                    <th>বিষয়বস্তু</th>
+
+                                    <th>সক্রিয়</th>
+
+                                    <th>পোস্ট তারিখ</th>
+
+                                    <th>অ্যাকশন</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                    `;
+
+                    data.data.forEach(notice => {
+
+                        const isActiveText = notice.is_active == 1 ? '✅ হ্যাঁ' : '❌ না';
+
+                        tableHTML += `
+
+                            <tr>
+
+                                <td data-label="ID">${notice.id}</td>
+
+                                <td data-label="বিষয়বস্তু">${notice.content.substring(0, 80)}...</td>
+
+                                <td data-label="সক্রিয়">${isActiveText}</td>
+
+                                <td data-label="পোস্ট তারিখ">${new Date(notice.created_at).toLocaleDateString('bn-BD')}</td>
+
+                                <td data-label="অ্যাকশন">
+
+                                    <button class="action-btn delete-btn" data-id="${notice.id}"><i class="fas fa-trash"></i> মুছুন</button>
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    });
+
+                    tableHTML += `</tbody></table>`;
+
+                    container.innerHTML = tableHTML;
+
+                    
+
+                    document.querySelectorAll('#notice-list-container .delete-btn').forEach(btn => {
+
+                        btn.addEventListener('click', () => deleteNotice(btn.dataset.id));
+
+                    });
+
+                } else if (data.success && data.data.length === 0) {
+
+                    container.innerHTML = '<p class="info-message">এখনও কোনো নোটিশ পোস্ট করা হয়নি।</p>';
+
+                } else {
+
+                    container.innerHTML = `<p class="error-message">নোটিশ তালিকা লোড করতে ব্যর্থ: ${data.message}</p>`;
+
+                }
+
+            } catch (error) {
+
+                container.innerHTML = `<p class="error-message">নেটওয়ার্ক এরর: ${error.message}</p>`;
+
+            }
+
+        }
+
+        async function deleteNotice(id) {
+
+            if (!confirm("আপনি কি নিশ্চিত এই নোটিশটি মুছে ফেলতে চান?")) {
+
+                return;
+
+            }
+
+            try {
+
+                const response = await fetch(`${API_BASE}/notice.php?action=delete_notice&id=${id}`, {
+
+                    method: 'DELETE'
+
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    alert("নোটিশ সফলভাবে মুছে ফেলা হয়েছে!");
+
+                    fetchNoticeList(); 
+
+                } else {
+
+                    alert(`মুছে ফেলার ব্যর্থ: ${data.message}`);
+
+                }
+
+            } catch (error) {
+
+                alert("নেটওয়ার্ক ত্রুটি বা সার্ভার এরর।");
+
+            }
+
+        }
+
+        // ----------------------------------------------------
+
+        // চ. অন্যান্য ডামি ফাংশন (অবশ্যই সংজ্ঞায়িত করতে হবে)
+
+        // ----------------------------------------------------
+
+        function loadSystemSettings() { tabContent.innerHTML = '<h2><i class="fas fa-cogs"></i> সিস্টেম সেটিংস</h2><p>এই অংশটি পরবর্তীতে তৈরি করা হবে।</p>'; }
+
+        function loadDefaultContent(tab) {
+
+            tabContent.innerHTML = `<p class="error-message">Error: ${tab} Manager code is missing. Please ensure admin_logic.js is correctly linked and uploaded.</p>`;
+
+        }
+
+        // ----------------------------------------------------
+
+        // প্রাথমিক লোডিং এবং ইভেন্ট সেটআপ
+
+        // ----------------------------------------------------
+
+        window.addEventListener('DOMContentLoaded', () => {
+
+            loadingMsg.style.display = 'none';
+
+            dashboardContainer.style.display = 'block'; 
+
+            loadSubjectManager();
+
+        });
+
+        // ট্যাব ক্লিক হ্যান্ডলার
+
+        tabs.addEventListener('click', (e) => {
+
+            const btn = e.target.closest('.tab-btn');
+
+            if (!btn) return;
+
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            btn.classList.add('active');
+
+            const tab = btn.dataset.tab;
+
+            
+
+            switch (tab) {
+
+                case 'subject':
+
+                    loadSubjectManager();
+
+                    break;
+
+                case 'chapter':
+
+                    loadChapterManager();
+
+                    break;
+
+                case 'notes':
+
+                    loadNotesManager();
+
+                    break;
+
+                case 'notice':
+
+                    loadNoticeManager();
+
+                    break;
+
+                case 'settings':
+
+                    loadSystemSettings();
+
+                    break;
+
+                default:
+
+                    loadDefaultContent('Unknown');
+
+            }
+
+        });
+
+        // *********************************************************
+
+        // WARNING: admin_logic.js এর সম্পূর্ণ কোড এখানে শেষ হচ্ছে
+
+        // *********************************************************
+
+    </script>
+
+</body>
+
+</html>

@@ -308,3 +308,72 @@ select, input[type=range] {
 }
 
 /* [Other necessary styles remain] */
+
+/* ==================== RESPONSIVE BREAKPOINTS ==================== */
+/* Mobile-first adjustments */
+@media (max-width: 992px) {
+    #content-grid {
+        grid-template-columns: 1fr; /* default to single column on tablet */
+    }
+
+    .subject-card, .note-card {
+        padding: 18px;
+    }
+
+    #search-input {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    #app-content { padding: 18px 12px; }
+
+    /* Make cards full-width and easier to tap */
+    .subject-card, .note-card {
+        width: 100%;
+        border-radius: 10px;
+        padding: 16px;
+    }
+
+    /* Make icon sizes larger for touch */
+    .subject-icon { width: 72px; height: 72px; }
+
+    /* Improve note preview height on narrow screens */
+    .note-preview { height: 10rem; }
+
+    /* Collapse any wide side panels */
+    #settings-panel { width: 100%; }
+}
+
+@media (max-width: 480px) {
+    :root { --font-size-base: 14px; }
+    .subject-card h3 { font-size: 1rem; }
+    .note-details h4 { font-size: 0.95rem; }
+    #search-input { max-width: 200px; }
+}
+
+/* ==================== MOBILE: 2-column grid preference ==================== */
+@media (max-width: 768px) {
+    /* Prefer two columns for dense mobile layout */
+    #content-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 0 10px; /* Add left-right padding so cards don't touch screen edges */
+    }
+
+    /* Smaller header and logo for compact mobile header */
+    #main-header {
+        padding: 8px 12px;
+    }
+    .logo h1 {
+        font-size: 1rem;
+    }
+
+    /* Reduce card padding slightly to fit two columns */
+    .subject-card, .note-card {
+        padding: 12px;
+    }
+
+    /* Reduce preview height to fit more rows on screen */
+    .note-preview { height: 8.5rem; }
+}
