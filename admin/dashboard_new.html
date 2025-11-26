@@ -515,22 +515,6 @@
             background: rgba(239, 68, 68, 0.1);
             color: var(--danger);
         }
-
-        /* Cards grid for mobile 2-column layout */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding: 0 12px; /* Add left-right padding on mobile */
-        }
-
-        /* Compact header for mobile */
-        @media (max-width: 768px) {
-            .admin-header { padding: 8px 12px; }
-            .admin-header h1 { font-size: 1.1rem; }
-            .tab-btn { padding: 0.6rem 1rem; font-size: 0.95rem; }
-            .modal-content { width: 95%; max-width: 420px; }
-        }
     </style>
 </head>
 <body>
@@ -945,68 +929,48 @@
                 chapterSelect.innerHTML = '<option value="">-- একটি বিষয় বেছে নিন --</option>' + subjectsHtml;
                 noteSelect.innerHTML = '<option value="">-- একটি বিষয় বেছে নিন --</option>' + subjectsHtml;
 
-                // Display subjects as table on desktop, cards on mobile
-                if (window.innerWidth <= 768) {
-                    const cards = data.data.map(subject => `
-                        <div class="card" style="display:flex;gap:12px;align-items:center;">
-                            <div class="icon-preview"><img src="${subject.icon_url}" alt="${subject.name}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;"></div>
-                            <div style="flex:1">
-                                <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <strong>${subject.name}</strong>
-                                    <span class="badge badge-primary">${subject.code}</span>
-                                </div>
-                                <div style="margin-top:6px;font-size:0.9rem;color:var(--text);opacity:0.8">${subject.description || ''}</div>
-                                <div style="margin-top:8px;display:flex;gap:8px;">
-                                    <button onclick="editSubject(${subject.id})" class="btn btn-primary btn-small"><i class="fas fa-edit"></i></button>
-                                    <button onclick="deleteSubject(${subject.id})" class="btn btn-danger btn-small"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                    subjectList.innerHTML = '<div class="cards-grid">'+cards+'</div>';
-                } else {
-                    // Display subjects table on larger screens
-                    const tableHtml = `
-                        <table>
-                            <thead>
+                // Display subjects table
+                const tableHtml = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>আইকন</th>
+                                <th>নাম</th>
+                                <th>কোড</th>
+                                <th>নোট সংখ্যা</th>
+                                <th>আপডেট তারিখ</th>
+                                <th>ক্রিয়া</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.data.map(subject => `
                                 <tr>
-                                    <th>আইকন</th>
-                                    <th>নাম</th>
-                                    <th>কোড</th>
-                                    <th>নোট সংখ্যা</th>
-                                    <th>আপডেট তারিখ</th>
-                                    <th>ক্রিয়া</th>
+                                    <td>
+                                        <div class="icon-preview">
+                                            <img src="${subject.icon_url}" alt="${subject.name}">
+                                        </div>
+                                    </td>
+                                    <td>${subject.name}</td>
+                                    <td><span class="badge badge-primary">${subject.code}</span></td>
+                                    <td>${subject.note_count || 0}</td>
+                                    <td>${new Date(subject.updated_at).toLocaleDateString('bn-BD')}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button onclick="editSubject(${subject.id})" class="btn btn-primary btn-small">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button onclick="deleteSubject(${subject.id})" class="btn btn-danger btn-small">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${data.data.map(subject => `
-                                    <tr>
-                                        <td>
-                                            <div class="icon-preview">
-                                                <img src="${subject.icon_url}" alt="${subject.name}">
-                                            </div>
-                                        </td>
-                                        <td>${subject.name}</td>
-                                        <td><span class="badge badge-primary">${subject.code}</span></td>
-                                        <td>${subject.note_count || 0}</td>
-                                        <td>${new Date(subject.updated_at).toLocaleDateString('bn-BD')}</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button onclick="editSubject(${subject.id})" class="btn btn-primary btn-small">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button onclick="deleteSubject(${subject.id})" class="btn btn-danger btn-small">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    `;
-                    subjectList.innerHTML = tableHtml;
-                }
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                subjectList.innerHTML = tableHtml;
             } catch (error) {
                 console.error('Error loading subjects:', error);
                 showAlert('danger', 'বিষয় লোড করতে ব্যর্থ');
@@ -1130,51 +1094,34 @@
                     return;
                 }
 
-                if (window.innerWidth <= 768) {
-                    const cards = data.data.map(chapter => `
-                        <div class="card">
-                            <div style="display:flex;justify-content:space-between;align-items:center;">
-                                <div>
-                                    <strong>${chapter.name}</strong>
-                                    <div style="font-size:0.9rem;color:var(--text);opacity:0.8">${chapter.subject_name}</div>
-                                </div>
-                                <div>
-                                    <div style="font-size:0.85rem;color:var(--text);opacity:0.7">${new Date(chapter.created_at).toLocaleDateString('bn-BD')}</div>
-                                    <div style="margin-top:8px;"><button onclick="deleteChapter(${chapter.id})" class="btn btn-danger btn-small"><i class="fas fa-trash"></i></button></div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                    chaptersList.innerHTML = '<div class="cards-grid">'+cards+'</div>';
-                } else {
-                    const tableHtml = `
-                        <table>
-                            <thead>
+                const tableHtml = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>নাম</th>
+                                <th>বিষয়</th>
+                                <th>তৈরি তারিখ</th>
+                                <th>ক্রিয়া</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.data.map(chapter => `
                                 <tr>
-                                    <th>নাম</th>
-                                    <th>বিষয়</th>
-                                    <th>তৈরি তারিখ</th>
-                                    <th>ক্রিয়া</th>
+                                    <td>${chapter.name}</td>
+                                    <td>${chapter.subject_name}</td>
+                                    <td>${new Date(chapter.created_at).toLocaleDateString('bn-BD')}</td>
+                                    <td>
+                                        <button onclick="deleteChapter(${chapter.id})" class="btn btn-danger btn-small">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${data.data.map(chapter => `
-                                    <tr>
-                                        <td>${chapter.name}</td>
-                                        <td>${chapter.subject_name}</td>
-                                        <td>${new Date(chapter.created_at).toLocaleDateString('bn-BD')}</td>
-                                        <td>
-                                            <button onclick="deleteChapter(${chapter.id})" class="btn btn-danger btn-small">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    `;
-                    chaptersList.innerHTML = tableHtml;
-                }
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                chaptersList.innerHTML = tableHtml;
             } catch (error) {
                 console.error('Error loading chapters:', error);
                 showAlert('danger', 'অধ্যায় লোড করতে ব্যর্থ');
@@ -1235,14 +1182,9 @@
             formData.append('action', 'add_note');
             formData.append('title', document.getElementById('note-title').value);
             formData.append('subject_id', document.getElementById('note-subject').value);
-            const chapterVal = document.getElementById('note-chapter').value;
-            if (chapterVal) formData.append('chapter_id', chapterVal);
+            formData.append('chapter_id', document.getElementById('note-chapter').value || null);
             formData.append('description', document.getElementById('note-description').value);
-            const fileInput = document.getElementById('note-file');
-            if (fileInput && fileInput.files.length > 0) {
-                // server expects uploaded file under 'note_file'
-                formData.append('note_file', fileInput.files[0]);
-            }
+            formData.append('file', document.getElementById('note-file').files[0]);
 
             try {
                 const response = await fetch(`${API_BASE}/notes.php`, {
@@ -1279,67 +1221,49 @@
                     `;
                     return;
                 }
-                if (window.innerWidth <= 768) {
-                    const cards = data.data.map(note => `
-                        <div class="card">
-                            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-                                <div style="flex:1;min-width:0">
-                                    <strong style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${note.title}</strong>
-                                    <div style="font-size:0.9rem;color:var(--text);opacity:0.8">${note.subject_name || ''} ${note.chapter_name ? '• '+note.chapter_name : ''}</div>
-                                    <div style="margin-top:6px;font-size:0.85rem;color:var(--text);opacity:0.7">${note.file_type} • ${new Date(note.last_edited).toLocaleDateString('bn-BD')}</div>
-                                </div>
-                                <div style="display:flex;flex-direction:row;gap:8px;align-items:center;margin-left:auto;">
-                                    <button onclick="editNote(${note.id})" class="btn btn-primary btn-small" title="সম্পাদনা করুন"><i class="fas fa-edit"></i></button>
-                                    <button onclick="viewNoteHistory(${note.id})" class="btn btn-warning btn-small" title="ইতিহাস দেখুন"><i class="fas fa-history"></i></button>
-                                    <button onclick="deleteNote(${note.id})" class="btn btn-danger btn-small" title="মুছুন"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                    notesList.innerHTML = '<div class="cards-grid">'+cards+'</div>';
-                } else {
-                    const tableHtml = `
-                        <table>
-                            <thead>
+
+                const tableHtml = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>শিরোনাম</th>
+                                <th>বিষয়</th>
+                                <th>অধ্যায়</th>
+                                <th>ফাইল টাইপ</th>
+                                <th>সম্পাদনা সংখ্যা</th>
+                                <th>শেষ সম্পাদনা</th>
+                                <th>ক্রিয়া</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.data.map(note => `
                                 <tr>
-                                    <th>শিরোনাম</th>
-                                    <th>বিষয়</th>
-                                    <th>অধ্যায়</th>
-                                    <th>ফাইল টাইপ</th>
-                                    <th>সম্পাদনা সংখ্যা</th>
-                                    <th>শেষ সম্পাদনা</th>
-                                    <th>ক্রিয়া</th>
+                                    <td>${note.title}</td>
+                                    <td>${note.subject_name}</td>
+                                    <td>${note.chapter_name || '-'}</td>
+                                    <td><span class="badge badge-primary">${note.file_type}</span></td>
+                                    <td>${note.edit_count || 0}</td>
+                                    <td>${new Date(note.last_edited).toLocaleDateString('bn-BD')}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button onclick="editNote(${note.id})" class="btn btn-primary btn-small" title="সম্পাদনা করুন">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button onclick="viewNoteHistory(${note.id})" class="btn btn-warning btn-small" title="ইতিহাস দেখুন">
+                                                <i class="fas fa-history"></i>
+                                            </button>
+                                            <button onclick="deleteNote(${note.id})" class="btn btn-danger btn-small" title="মুছুন">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${data.data.map(note => `
-                                    <tr>
-                                        <td>${note.title}</td>
-                                        <td>${note.subject_name}</td>
-                                        <td>${note.chapter_name || '-'}'</td>
-                                        <td><span class="badge badge-primary">${note.file_type}</span></td>
-                                        <td>${note.edit_count || 0}</td>
-                                        <td>${new Date(note.last_edited).toLocaleDateString('bn-BD')}</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button onclick="editNote(${note.id})" class="btn btn-primary btn-small" title="সম্পাদনা করুন">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button onclick="viewNoteHistory(${note.id})" class="btn btn-warning btn-small" title="ইতিহাস দেখুন">
-                                                    <i class="fas fa-history"></i>
-                                                </button>
-                                                <button onclick="deleteNote(${note.id})" class="btn btn-danger btn-small" title="মুছুন">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    `;
-                    notesList.innerHTML = tableHtml;
-                }
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                notesList.innerHTML = tableHtml;
             } catch (error) {
                 console.error('Error loading notes:', error);
                 showAlert('danger', 'নোট লোড করতে ব্যর্থ');

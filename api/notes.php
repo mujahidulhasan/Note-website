@@ -46,7 +46,7 @@ switch ($action) {
         if ($chapter_id === 0) { http_response_code(400); echo json_encode(["success" => false, "message" => "Chapter ID is required."]); exit(); }
         try {
             // Soft Delete all notes under this chapter
-            $pdo->prepare("UPDATE notes SET is_deleted = TRUE, deleted_at = NOW() WHERE chapter_id = ?")->execute([$chapter_id]);
+            $pdo->prepare("UPDATE notes SET is_deleted = 1, deleted_at = datetime('now') WHERE chapter_id = ?")->execute([$chapter_id]);
             
             // Delete the chapter
             $stmt = $pdo->prepare("DELETE FROM chapters WHERE id = ?");
@@ -92,7 +92,8 @@ switch ($action) {
         
         if (move_uploaded_file($note_file['tmp_name'], $target_file)) {
             try {
-                $stmt = $pdo->prepare("INSERT INTO notes (title, subject_id, chapter_id, file_path, file_type, edit_count, last_edited) VALUES (?, ?, ?, ?, ?, 0, NOW())");
+                // Use SQLite-compatible defaults (last_edited default set in schema)
+                $stmt = $pdo->prepare("INSERT INTO notes (title, subject_id, chapter_id, file_path, file_type) VALUES (?, ?, ?, ?, ?)");
                 $stmt->execute([$title, $subject_id, $chapter_id, $file_path, $file_type]);
                 $note_id = $pdo->lastInsertId();
 
@@ -130,7 +131,7 @@ switch ($action) {
             $old_note = $stmt_old->fetch();
             
             // Perform the update
-            $stmt = $pdo->prepare("UPDATE notes SET title = ?, chapter_id = ?, description = ?, edit_count = edit_count + 1, last_edited = NOW() WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE notes SET title = ?, chapter_id = ?, description = ?, edit_count = edit_count + 1, last_edited = datetime('now') WHERE id = ?");
             $stmt->execute([$title, $chapter_id, $description, $note_id]);
             
             // Log History (if title changed)
@@ -150,7 +151,7 @@ switch ($action) {
         
         try {
             // Soft Delete: is_deleted = TRUE
-            $stmt = $pdo->prepare("UPDATE notes SET is_deleted = TRUE, deleted_at = NOW() WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE notes SET is_deleted = 1, deleted_at = datetime('now') WHERE id = ?");
             $stmt->execute([$note_id]);
             
             // Log History
@@ -170,7 +171,8 @@ switch ($action) {
         $note_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         
         try {
-            $stmt = $pdo->prepare("SELECT * FROM note_history WHERE note_id = ? ORDER BY changed_at DESC");
+            // Normalize history response to match frontend expectations: { action, details, created_at }
+            $stmt = $pdo->prepare("SELECT user_action AS action, change_description AS details, created_at FROM note_history WHERE note_id = ? ORDER BY created_at DESC");
             $stmt->execute([$note_id]);
             echo json_encode(["success" => true, "data" => $stmt->fetchAll()]);
         } catch (PDOException $e) { http_response_code(500); echo json_encode(["success" => false, "message" => "DB error: " . $e->getMessage()]); }
@@ -183,15 +185,22 @@ switch ($action) {
         try {
             $sql = "
                 SELECT 
-                    n.id, n.title, n.file_type, n.upload_date, c.name AS chapter_name, s.id AS subject_id,
-                    n.edit_count, n.last_edited
+                    n.id,
+                    n.title,
+                    n.file_type,
+                    n.created_at AS created_at,
+                    c.name AS chapter_name,
+                    s.id AS subject_id,
+                    n.edit_count,
+                    n.last_edited
                 FROM notes n
                 LEFT JOIN chapters c ON n.chapter_id = c.id
                 LEFT JOIN subjects s ON n.subject_id = s.id
-                WHERE n.is_deleted = FALSE 
-                ORDER BY n.upload_date DESC
+                WHERE n.is_deleted = 0
+                ORDER BY n.created_at DESC
             ";
-            $stmt = $pdo->query($sql);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
             $notes = $stmt->fetchAll();
 
             echo json_encode(["success" => true, "data" => $notes]);
@@ -216,11 +225,11 @@ switch ($action) {
 
             $sql = "
                 SELECT 
-                    n.id, n.title, n.file_path, n.file_type, n.upload_date, c.name AS chapter_name
+                    n.id, n.title, n.file_path, n.file_type, n.created_at AS created_at, c.name AS chapter_name
                 FROM notes n
                 LEFT JOIN chapters c ON n.chapter_id = c.id
-                WHERE n.subject_id = ? AND n.is_deleted = FALSE -- only active notes
-                ORDER BY c.name ASC, n.upload_date DESC
+                WHERE n.subject_id = ? AND n.is_deleted = 0 -- only active notes
+                ORDER BY c.name ASC, n.created_at DESC
             ";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$subject_id]);
